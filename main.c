@@ -6,6 +6,7 @@
 #include "driver/adc.h"
 #include "driver/dac.h"
 #include "esp_adc_cal.h"
+
 #include "time.h"
 #include "sdkconfig.h"
 #include "calibration.h"
@@ -33,30 +34,21 @@ static const adc_unit_t unit = ADC_UNIT_1;
 
 
 
-
-int usds_current;
-int usds_prev;
-int bed_current;
-int bed_prev;
-
 void app_main(void)
 {
     check_efuse();
     systemInitialise();
     calibrationInitialise();
-
+    
     sensor_read();                  // get initial bed and us values
-    bed_prev = set_bed_current();   // set initial bed state
-    usds_prev = set_usds_current(); // set initial us state
+    inititialStage();
 
     while (1)
     {
         calibrationMain();
         sensor_read();
         set_execute();
-
-        bed_prev = bed_current;
-        usds_prev = usds_current;
+        updatingStage();
 
         vTaskDelay(1000 / portTICK_RATE_MS);
     }
